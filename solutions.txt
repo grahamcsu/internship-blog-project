@@ -1,0 +1,67 @@
+SQL Exercises — Solutions
+==========================
+
+1. Every author
+---------------
+SELECT * FROM Author;
+
+
+2. Article titles only
+----------------------
+SELECT Title FROM Article;
+
+
+3. Filter by author
+-------------------
+SELECT Title FROM Article WHERE AuthorId = 1;
+
+
+4. Sorted tags
+--------------
+SELECT Name FROM Tag ORDER BY Name ASC;
+
+
+5. Sort articles by title
+-------------------------
+SELECT * FROM Article ORDER BY Title ASC;
+
+
+6. Join: article + author
+-------------------------
+SELECT Article.Title, Author.FirstName, Author.LastName
+FROM Article
+JOIN Author ON Article.AuthorId = Author.Id;
+
+
+7. Join + filter: articles by Twain
+-----------------------------------
+SELECT Article.Title
+FROM Article
+JOIN Author ON Article.AuthorId = Author.Id
+WHERE Author.LastName = 'Twain';
+
+
+8. Group: articles per author
+-----------------------------
+SELECT Author.FirstName, Author.LastName, COUNT(*) AS ArticleCount
+FROM Author
+JOIN Article ON Author.Id = Article.AuthorId
+GROUP BY Author.Id;
+
+
+9. Many-to-many join: article + tags
+------------------------------------
+SELECT Article.Title, Tag.Name
+FROM Article
+JOIN ArticleTag ON Article.Id = ArticleTag.ArticleId
+JOIN Tag ON Tag.Id = ArticleTag.TagId;
+
+
+10. Group + having: popular tags
+--------------------------------
+SELECT Tag.Name, COUNT(*) AS ArticleCount
+FROM Tag
+JOIN ArticleTag ON Tag.Id = ArticleTag.TagId
+GROUP BY Tag.Id
+HAVING COUNT(*) > 1
+ORDER BY ArticleCount DESC;
