@@ -1,16 +1,565 @@
 <!doctype html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fbf9f4;
+        --card: #ffffff;
+        --ink: #1d1a14;
+        --muted: #6d675b;
+        --faint: #a9a294;
+        --line: #e6e0d3;
+        --accent: #1c4a55;   /* pressman teal — structure, links */
+        --action: #cf4a24;   /* minium — primary actions */
+        --brass: #9a7a24;
+
+        --display: "Bricolage Grotesque", system-ui, sans-serif;
+        --serif: "Newsreader", Georgia, serif;
+        --mono: "Space Mono", ui-monospace, monospace;
+      }
+
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 19px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { color: var(--action); }
+
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+      /* ---------- top bar ---------- */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(251, 249, 244, 0.9);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--line);
+      }
+      .topbar__in {
+        width: min(940px, 92vw);
+        margin: 0 auto;
+        height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .topbar__home {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+      .topbar__home:hover { color: var(--action); }
+      .topbar__home .dot { width: 9px; height: 9px; background: var(--action); border-radius: 50%; }
+
+      .wrap { width: min(940px, 92vw); margin: 0 auto; }
+      .reading { width: min(680px, 92vw); margin: 0 auto; }
+
+      /* ---------- buttons ---------- */
+      .btn {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        padding: 0.7em 1.15em;
+        cursor: pointer;
+        background: var(--action);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+      }
+      .btn:hover { background: #e0562e; color: #fff; }
+      .btn--ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+      .btn--ghost:hover { background: #fff; border-color: var(--accent); color: var(--ink); }
+      .btn--warn { background: transparent; border-color: var(--line); color: var(--action); }
+      .btn--warn:hover { background: #fbeee9; border-color: var(--action); color: var(--action); }
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      /* ---------- home: intro ---------- */
+      .intro {
+        padding: clamp(2.6rem, 7vw, 5rem) 0 clamp(1.6rem, 4vw, 2.6rem);
+        border-bottom: 1px solid var(--line);
+      }
+      .intro__kicker { color: var(--brass); margin-bottom: 1rem; }
+      .intro__lead {
+        font-size: clamp(1.7rem, 4.6vw, 2.9rem);
+        font-weight: 500;
+        line-height: 1.12;
+        letter-spacing: -0.015em;
+        max-width: 20ch;
+        margin: 0;
+      }
+      .intro__lead b { font-weight: 600; color: var(--accent); font-style: italic; }
+
+      /* ---------- feed ---------- */
+      .feed { padding: clamp(1.4rem, 4vw, 2.4rem) 0; }
+      .feed__label {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        color: var(--muted);
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .post {
+        display: grid;
+        grid-template-columns: 3.4rem 1fr;
+        gap: 1.4rem;
+        padding: clamp(1.6rem, 3.4vw, 2.3rem) 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .post__no { font-family: var(--mono); font-size: 0.8rem; color: var(--faint); padding-top: 0.5rem; }
+      .post__title {
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: clamp(1.55rem, 3.6vw, 2.1rem);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.5rem;
+      }
+      .post__title a { color: var(--ink); }
+      .post__title a:hover { color: var(--action); }
+      .post__byline { color: var(--muted); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; margin-bottom: 0.7rem; }
+      .post__byline b { color: var(--ink); font-weight: 400; }
+      .post__excerpt { color: #453f33; margin: 0; max-width: 60ch; }
+
+      /* ---------- contributors ---------- */
+      .contrib { padding: clamp(2.4rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); }
+      .contrib__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.8rem;
+        margin-top: 1.4rem;
+      }
+      .author {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        padding: 1rem 1.1rem;
+        min-height: 116px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .author__no { color: var(--faint); }
+      .author__name { font-family: var(--display); font-weight: 600; font-size: 1.25rem; letter-spacing: -0.01em; margin-top: 0.35rem; }
+      .author__foot { display: flex; justify-content: space-between; align-items: center; margin-top: 0.9rem; }
+      .author__count { color: var(--muted); }
+      .link-btn {
+        background: none; border: none; padding: 0; cursor: pointer;
+        font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--faint); transition: color 0.15s ease;
+      }
+      .link-btn:hover { color: var(--action); }
+      .author--add { border-style: dashed; gap: 0.6rem; justify-content: center; }
+      .author--add input {
+        width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 2px;
+        padding: 0.5rem 0.6rem; font-family: var(--serif); font-size: 0.95rem; color: var(--ink);
+      }
+      .author--add input:focus { outline: none; border-color: var(--accent); }
+
+      /* ---------- article page ---------- */
+      .article { padding: clamp(1.6rem, 4vw, 3rem) 0 clamp(3rem, 8vw, 5rem); }
+      .backlink { color: var(--muted); font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; display: inline-block; margin-bottom: 2rem; }
+      .article__no { color: var(--action); margin-bottom: 0.9rem; }
+      .article__title {
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: clamp(2.2rem, 6vw, 3.4rem);
+        line-height: 1.03;
+        letter-spacing: -0.025em;
+        margin: 0 0 0.7rem;
+      }
+      .article__byline { color: var(--muted); font-family: var(--mono); font-size: 0.76rem; letter-spacing: 0.06em; padding-bottom: 1.6rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+      .article__body { font-size: 1.2rem; line-height: 1.75; color: #2e2a21; white-space: pre-wrap; word-wrap: break-word; }
+      .article__body::first-letter {
+        font-family: var(--display); font-weight: 700; float: left;
+        font-size: 3.4em; line-height: 0.72; padding: 0.06em 0.1em 0 0; color: var(--action);
+      }
+      .article__actions { display: flex; gap: 0.6rem; margin-top: 2.6rem; padding-top: 1.6rem; border-top: 1px solid var(--line); flex-wrap: wrap; align-items: center; }
+      .confirm-txt { color: var(--action); font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.06em; margin-right: 0.2rem; }
+
+      /* ---------- forms ---------- */
+      .compose { padding: clamp(1.6rem, 4vw, 3rem) 0 clamp(3rem, 8vw, 5rem); }
+      .compose__head { color: var(--action); margin-bottom: 0.6rem; }
+      .compose__title { font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, 5vw, 2.8rem); letter-spacing: -0.02em; margin: 0 0 2rem; }
+      .field { margin-bottom: 1.5rem; }
+      .field label { display: block; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+      .field input, .field textarea, .field select {
+        width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 2px;
+        padding: 0.75rem 0.85rem; font-family: var(--serif); font-size: 1.1rem; color: var(--ink);
+      }
+      .field--title input { font-family: var(--display); font-weight: 600; font-size: 1.6rem; letter-spacing: -0.01em; }
+      .field textarea { min-height: 300px; resize: vertical; line-height: 1.7; }
+      .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--action); }
+      .form__actions { display: flex; gap: 0.6rem; margin-top: 1.8rem; }
+      .form__note { background: #fbeee9; border-left: 3px solid var(--action); padding: 0.9rem 1.1rem; color: #7a3419; margin-bottom: 1.6rem; font-size: 0.98rem; }
+      .form__note a { color: #7a3419; text-decoration: underline; }
+
+      /* ---------- misc ---------- */
+      .empty {
+        padding: clamp(2rem, 5vw, 3.4rem); text-align: center; color: var(--muted);
+        border: 1px dashed var(--line); border-radius: 4px; font-style: italic; font-size: 1.1rem;
+      }
+      .colophon { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; }
+
+      /* ---------- toast ---------- */
+      .toast {
+        position: fixed; left: 50%; bottom: 1.6rem; transform: translate(-50%, 180%);
+        background: var(--ink); color: var(--bg); padding: 0.8rem 1.2rem; border-radius: 3px;
+        font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.04em; z-index: 60;
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22); max-width: 90vw;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .toast.show { transform: translate(-50%, 0); }
+      .toast--err { border-left: 3px solid var(--action); }
+      .toast--ok { border-left: 3px solid var(--brass); }
+
+      @media (max-width: 600px) {
+        body { font-size: 18px; }
+        .post { grid-template-columns: 1fr; gap: 0.3rem; }
+        .post__no { padding-top: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        * { transition: none !important; }
+      }
+    </style>
+  </head>
   <body>
-    <h1>Tiny site</h1>
-    <button onclick="loadMessages()">Call backend</button>
-    <pre id="out"></pre>
+    <div class="topbar">
+      <div class="topbar__in">
+        <a class="topbar__home" href="#/"><span class="dot"></span>The Blog</a>
+        <a class="btn" href="#/write">Write</a>
+      </div>
+    </div>
+
+    <main id="app" class="wrap"></main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
-      async function loadMessages() {
-        const res = await fetch("/api/grab/");
-        const data = await res.json();
-        document.getElementById("out").append(data.message);
+      /* ---------------- api ---------------- */
+      const api = async (path, opts = {}) => {
+        const res = await fetch(path, opts);
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : null;
+        if (!res.ok) throw new Error(data && data.detail ? data.detail : res.status + " " + res.statusText);
+        return data;
+      };
+
+      const esc = (s) =>
+        String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const pad = (n) => String(n).padStart(2, "0");
+
+      const state = { articles: [], authors: [], authorMap: {}, loaded: false };
+      const $ = (id) => document.getElementById(id);
+      const app = $("app");
+      const nameOf = (id) => state.authorMap[id] || "Unknown contributor";
+      const articleCount = (aid) => state.articles.filter((a) => a.AuthorId === aid).length;
+
+      /* ---------------- toast ---------------- */
+      let toastTimer;
+      function toast(msg, kind = "ok") {
+        const t = $("toast");
+        t.textContent = msg;
+        t.className = "toast toast--" + kind + " show";
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => (t.className = "toast"), 3200);
       }
+
+      /* ---------------- data ---------------- */
+      async function loadData() {
+        const [articles, authors] = await Promise.all([api("/api/articles/all"), api("/api/authors/all")]);
+        state.articles = articles || [];
+        state.authors = authors || [];
+        state.authorMap = {};
+        state.authors.forEach((a) => (state.authorMap[a.Id] = (a.FirstName + " " + a.LastName).trim()));
+        state.loaded = true;
+      }
+
+      const excerpt = (txt) => {
+        const s = String(txt || "").trim();
+        return s.length > 240 ? s.slice(0, 240).trimEnd() + "…" : s;
+      };
+
+      /* ---------------- router ---------------- */
+      async function route() {
+        const hash = location.hash.replace(/^#/, "") || "/";
+        const parts = hash.split("/").filter(Boolean); // ["article","3"] etc.
+        window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+
+        try {
+          if (!state.loaded) await loadData();
+
+          if (parts[0] === "article") return viewArticle(parts[1]);
+          if (parts[0] === "write") return viewCompose(null);
+          if (parts[0] === "edit") return viewCompose(parts[1]);
+          return viewHome();
+        } catch (e) {
+          app.innerHTML = `<div class="feed"><div class="empty">Couldn't reach the press. Check that the server is running, then reload.<br /><span class="mono" style="color:var(--faint)">${esc(e.message)}</span></div></div>`;
+        }
+      }
+
+      /* ---------------- home ---------------- */
+      function viewHome() {
+        const posts = state.articles.length
+          ? state.articles
+              .map(
+                (art) => `
+            <article class="post">
+              <div class="post__no">№ ${pad(art.Id)}</div>
+              <div>
+                <h2 class="post__title"><a href="#/article/${art.Id}">${esc(art.Title)}</a></h2>
+                <div class="post__byline">By <b>${esc(nameOf(art.AuthorId))}</b></div>
+                <p class="post__excerpt">${esc(excerpt(art.Content))}</p>
+              </div>
+            </article>`
+              )
+              .join("")
+          : `<div class="empty" style="margin-top:1.4rem">Nothing written yet. The first page is yours — press <b>Write</b>.</div>`;
+
+        const authors = state.authors
+          .map((a) => {
+            const n = articleCount(a.Id);
+            return `
+            <div class="author">
+              <div>
+                <div class="author__no mono">№ ${pad(a.Id)}</div>
+                <div class="author__name">${esc((a.FirstName + " " + a.LastName).trim())}</div>
+              </div>
+              <div class="author__foot">
+                <span class="author__count mono">${n} ${n === 1 ? "entry" : "entries"}</span>
+                <button class="link-btn" data-delauthor="${a.Id}">Remove</button>
+              </div>
+            </div>`;
+          })
+          .join("");
+
+        app.innerHTML = `
+          <section class="intro">
+            <div class="intro__kicker mono">Writing in the open</div>
+            <p class="intro__lead">Essays, notes, and dispatches from people <b>learning as they go</b>.</p>
+          </section>
+
+          <section class="feed">
+            <div class="feed__label mono"><span>The Feed</span><span>§ ${pad(state.articles.length)}</span></div>
+            ${posts}
+          </section>
+
+          <section class="contrib">
+            <div class="feed__label mono"><span>Contributors</span><span>§ ${pad(state.authors.length)}</span></div>
+            <div class="contrib__grid">
+              ${authors}
+              <form class="author author--add" id="author-form">
+                <input id="a-first" type="text" placeholder="First name" required autocomplete="off" />
+                <input id="a-last" type="text" placeholder="Last name" required autocomplete="off" />
+                <button class="btn btn--ghost" type="submit">Add byline</button>
+              </form>
+            </div>
+          </section>
+
+          <footer class="colophon mono">
+            <span>A blog kept in the open</span>
+            <span>Set in Bricolage Grotesque &amp; Newsreader</span>
+          </footer>`;
+
+        $("author-form").addEventListener("submit", addAuthor);
+        app.querySelectorAll("[data-delauthor]").forEach((b) =>
+          b.addEventListener("click", () => deleteAuthor(Number(b.dataset.delauthor)))
+        );
+      }
+
+      /* ---------------- article page ---------------- */
+      async function viewArticle(id) {
+        let art;
+        try {
+          art = await api("/api/articles/" + id);
+        } catch (e) {
+          app.innerHTML = `<div class="article reading"><a class="backlink" href="#/">← Back to the feed</a><div class="empty">That entry couldn't be found. It may have been removed.</div></div>`;
+          return;
+        }
+        app.innerHTML = `
+          <article class="article reading">
+            <a class="backlink" href="#/">← Back to the feed</a>
+            <div class="article__no mono">Entry № ${pad(art.Id)}</div>
+            <h1 class="article__title">${esc(art.Title)}</h1>
+            <div class="article__byline">By ${esc(nameOf(art.AuthorId))}</div>
+            <div class="article__body">${esc(art.Content || "")}</div>
+            <div class="article__actions" id="art-actions">
+              <a class="btn btn--ghost" href="#/edit/${art.Id}">Edit</a>
+              <button class="btn btn--warn" id="del-btn">Delete</button>
+            </div>
+          </article>`;
+
+        const actions = $("art-actions");
+        $("del-btn").addEventListener("click", () => {
+          actions.innerHTML = `
+            <span class="confirm-txt">Delete this entry for good?</span>
+            <button class="btn btn--warn" id="del-yes">Delete</button>
+            <button class="btn btn--ghost" id="del-no">Keep it</button>`;
+          $("del-yes").addEventListener("click", () => deleteArticle(art.Id));
+          $("del-no").addEventListener("click", () => viewArticle(art.Id));
+        });
+      }
+
+      /* ---------------- compose / edit ---------------- */
+      async function viewCompose(editId) {
+        const editing = editId != null;
+        let art = null;
+        if (editing) {
+          try { art = await api("/api/articles/" + editId); }
+          catch { app.innerHTML = `<div class="compose reading"><a class="backlink" href="#/">← Back</a><div class="empty">That entry couldn't be found.</div></div>`; return; }
+        }
+
+        const noAuthors = !editing && state.authors.length === 0;
+        const authorOptions = state.authors
+          .map((a) => `<option value="${a.Id}">${esc((a.FirstName + " " + a.LastName).trim())}</option>`)
+          .join("");
+
+        app.innerHTML = `
+          <div class="compose reading">
+            <a class="backlink" href="${editing ? "#/article/" + editId : "#/"}">← ${editing ? "Back to the entry" : "Back to the feed"}</a>
+            <div class="compose__head mono">${editing ? "Revising № " + pad(editId) : "New entry"}</div>
+            <h1 class="compose__title">${editing ? "Edit entry" : "Write an entry"}</h1>
+            <form id="compose-form">
+              ${noAuthors ? `<div class="form__note">Add a contributor first — every entry needs a byline. <a href="#/">Add one on the home page.</a></div>` : ""}
+              ${editing ? "" : `
+                <div class="field">
+                  <label for="f-author">Byline</label>
+                  <select id="f-author" ${noAuthors ? "disabled" : "required"}>${authorOptions}</select>
+                </div>`}
+              <div class="field field--title">
+                <label for="f-title">Title</label>
+                <input id="f-title" type="text" required placeholder="Give it a headline" value="${editing ? esc(art.Title) : ""}" />
+              </div>
+              <div class="field">
+                <label for="f-content">Body</label>
+                <textarea id="f-content" required placeholder="Write in the open…">${editing ? esc(art.Content || "") : ""}</textarea>
+              </div>
+              <div class="form__actions">
+                <button type="submit" class="btn" ${noAuthors ? "disabled" : ""}>${editing ? "Save changes" : "Publish"}</button>
+                <a class="btn btn--ghost" href="${editing ? "#/article/" + editId : "#/"}">Cancel</a>
+              </div>
+            </form>
+          </div>`;
+
+        const form = $("compose-form");
+        setTimeout(() => $("f-title").focus(), 40);
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const title = $("f-title").value.trim();
+          const content = $("f-content").value.trim();
+          if (!title || !content) return;
+          try {
+            if (editing) {
+              await api("/api/articles/update?upd_id=" + editId, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, content }),
+              });
+              await loadData();
+              toast("Saved.", "ok");
+              location.hash = "#/article/" + editId;
+            } else {
+              const author_id = Number($("f-author").value);
+              const created = await api("/api/articles", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, content, author_id }),
+              });
+              await loadData();
+              toast("Published.", "ok");
+              location.hash = created && created.Id ? "#/article/" + created.Id : "#/";
+            }
+          } catch (err) {
+            toast("Couldn't save — " + err.message, "err");
+          }
+        });
+      }
+
+      /* ---------------- mutations ---------------- */
+      async function deleteArticle(id) {
+        try {
+          await api("/api/articles/delete?del_id=" + id, { method: "DELETE" });
+          await loadData();
+          toast("Entry removed.", "ok");
+          location.hash = "#/";
+        } catch (e) {
+          toast("Couldn't delete — " + e.message, "err");
+        }
+      }
+
+      async function deleteAuthor(id) {
+        const n = articleCount(id);
+        const name = nameOf(id);
+        const warn = n ? `Remove ${name}? Their ${n} ${n === 1 ? "entry" : "entries"} will be removed too.` : `Remove ${name}?`;
+        if (!confirm(warn)) return;
+        try {
+          await api("/api/authors/delete?del_id=" + id, { method: "DELETE" });
+          await loadData();
+          toast("Contributor removed.", "ok");
+          route();
+        } catch (e) {
+          toast("Couldn't remove — " + e.message, "err");
+        }
+      }
+
+      async function addAuthor(e) {
+        e.preventDefault();
+        const firstname = $("a-first").value.trim();
+        const lastname = $("a-last").value.trim();
+        if (!firstname || !lastname) return;
+        try {
+          await api("/api/authors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstname, lastname }),
+          });
+          await loadData();
+          toast("Contributor added.", "ok");
+          route();
+        } catch (err) {
+          toast("Couldn't add — " + err.message, "err");
+        }
+      }
+
+      window.addEventListener("hashchange", route);
+      route();
     </script>
   </body>
 </html>

@@ -6,8 +6,6 @@ import logging
 import sqlite3
 import json
 import pandas as pd
-def run(query):
-    return pd.read_sql_query(query, conn)
 import os
 from schema.model import Article, ArticleCreate, ArticleUpdate, AuthorCreate
 logging.basicConfig(level=logging.INFO)
@@ -17,12 +15,7 @@ engine = create_engine('sqlite:///articles.db')
 metadata= MetaData()
 articles = Table("article", metadata, autoload_with=engine)
 authors = Table("author", metadata, autoload_with=engine)
-with engine.connect() as conn:
-    for row in conn.execute(select(articles)):
-        print(row)
 
-
-conn = sqlite3.connect('articles.db')
 
 @app.get("/api/articles/all")
 def get_all_articles():
@@ -105,3 +98,5 @@ def delete_authors(del_id:int):
 # finish delete-- DONE
 # same stuff but for author-- later
 # create tables through python-- later
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
